@@ -1,0 +1,15 @@
+-- Script to output the current file paths for user databases
+
+DECLARE @sql NVARCHAR(MAX) = '';
+
+-- Generate script to output current file paths
+SELECT @sql += '
+-- Current file paths for database ' + QUOTENAME(d.name) + '
+ALTER DATABASE ' + QUOTENAME(d.name) + ' MODIFY FILE (NAME = N''' + df.name + ''', FILENAME = N''' + df.physical_name + ''');
+'
+FROM sys.databases d
+INNER JOIN sys.master_files df ON d.database_id = df.database_id
+WHERE d.name NOT IN ('master', 'model', 'msdb', 'tempdb');
+
+-- Print the generated script
+PRINT @sql;
